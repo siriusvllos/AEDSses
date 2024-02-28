@@ -13,10 +13,10 @@ void main()
         while (size >= 0)
         {
             gnirts[i] = string[size];
-            // printf("gnirts na posição %d: %c\n", i, gnirts[i]);
+            printf("gnirts na posição %d: %c\n", i, gnirts[i]);
             i++, size--;
         }
-        // printf("GNIRTS = %s\n", gnirts);
+         printf("GNIRTS = %s\n", gnirts);
 
         if (strcmp(string, gnirts) == 0)
         {
