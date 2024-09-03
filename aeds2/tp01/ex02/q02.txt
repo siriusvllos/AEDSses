@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <string.h>
+
+/* Olá, aqui é o Sirius
+ * Eu escrevi esse código para cumprir a função da q01 do TP01,
+ * ele lê uma entrada string, e retorna se essa string é um palindromo ou nao.
+ * Eu fiz isso partindo a string no meio, e vindo da esquerda e direita comparando
+ * os caracteres
+ * FOI UM PARTO */
+
+int countLength(char string[])
+{
+    int count = 0;
+    while (string[count] != '\n')
+    {
+        count++;
+    }
+    return count - 1;
+}
+
+void isPalindrome(char string[])
+{
+    int length = countLength(string) + 1;
+    int esq = 0, dir = length - 1;
+    int count = 0;
+    //printf("length == %d\n", length);
+
+    for (int i = 0; i < length / 2; i++)
+    {
+        if (string[esq] == string[dir])
+        {
+            count++;
+        }
+        dir--;
+        esq++;
+    }
+    //printf("count == %d\n", count);
+
+    if (length / 2 == count)
+    {
+        printf("SIM\n");
+    }
+    else
+    {
+        printf("NAO\n");
+    }
+}
+
+int compareStrings(char s1[], char s2[])
+{
+    int count = 0, resp = 0;
+    while (s1[count] != '\n' && s2[count] != '\n')
+    {
+        if (s1[count] == s2[count])
+        {
+            resp++;
+        }
+        count++;
+    }
+    if (resp == count)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+int main()
+{
+    char palindromo[5000];
+    fgets(palindromo, 5000, stdin); // isso tá certo? R: sim
+
+    int comp = compareStrings(palindromo, "FIM");
+    //printf("COMP == %d\n", comp);
+    while (!comp)
+    {
+        isPalindrome(palindromo);
+        fgets(palindromo, 5000, stdin);
+    }
+}
