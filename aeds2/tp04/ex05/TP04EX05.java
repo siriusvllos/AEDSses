@@ -1,4 +1,8 @@
+//package ex05;
+
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -36,6 +40,24 @@ class Pokemon {
         setCaptureRate(captureRate);
         setIsLegendary(isLegendary);
         setCaptureDate(captureDate);
+    }
+
+    public Pokemon(String csvLine) {
+        String[] values = csvLine.split(",");
+
+        setId(Integer.parseInt(values[0]));
+        setGeneration(Integer.parseInt(values[1]));
+        setName(values[2]);
+        setDescription(values[3]);
+        ArrayList<String> types = new ArrayList<String>(Arrays.asList(values[4].split(",")));
+        setTypes(types);
+        ArrayList<String> abilities = new ArrayList<String>(Arrays.asList(values[5].split(",")));
+        setAbilities(abilities);
+        setWeight(Double.parseDouble(values[6]));
+        setHeight(Double.parseDouble(values[7]));
+        setCaptureRate(Integer.parseInt(values[8]));
+        setIsLegendary(Boolean.parseBoolean(values[9]));
+        setCaptureDate(LocalDate.parse(values[10]));
     }
 
     public int getId() {
@@ -222,68 +244,125 @@ class Pokemon {
         return this.getName().compareTo(p.getName());
     }
 }
+// HASH
 
-// NO / ARVORE
-class Node {
+class Hash {
 
-    Pokemon pokemon;
-    Node esq;
-    Node dir;
+    int tamTab;
+    int tamRes;
+    int reserva;
+    Pokemon tabela[];
 
-    public Node() {
-        this.pokemon = null;
-        this.esq = this.dir = null;
+    public Hash() {
+        this.tamTab = 21;
+        this.tamRes = 9;
+        this.reserva = 0;
+        this.tabela = new Pokemon[tamTab + tamRes];
     }
 
-    public Node(Pokemon p) {
-        this.pokemon = p;
-        this.esq = this.dir = null;
-    }
-}
-
-class ArvoreBinaria {
-
-    private Node head;
-
-    public ArvoreBinaria() {
-        this.head = null;
-    }
-
-    public void inserir(Pokemon p) {
-        head = inserir(p, head);
-    }
-
-    private Node inserir(Pokemon p, Node node) {
-        if (node == null) {
-            node = new Node(p);
-        } else if (p.compareTo(node.pokemon) < 0) {
-            node.esq = inserir(p, node.esq);
-        } else if (p.compareTo(node.pokemon) > 0) {
-            node.dir = inserir(p, node.dir);
-        }
-        return node;
-    }
-
-    public boolean pesquisar(String name) {
-        System.out.print("raiz ");
-        return pesquisar(name, head);
-    }
-
-    private boolean pesquisar(String name, Node node) {
+    public boolean inserir(Pokemon pokemon) {
         boolean resp = false;
 
-        if (node == null) {
-            resp = false;
-        } else if (name.compareTo(node.pokemon.getName()) < 0) {
-            System.out.print("esq ");
-            resp = pesquisar(name, node.esq);
-        } else if (name.compareTo(node.pokemon.getName()) > 0) {
-            System.out.print("dir ");
-            resp = pesquisar(name, node.dir);
-        } else {
-            resp = true;
+        if (pokemon != null) {
+            int pos = hash(pokemon.getName());
+
+            if (tabela[pos] == null) {
+                tabela[pos] = pokemon;
+                resp = true;
+            } else if (reserva < tamRes) {
+                tabela[tamTab + reserva++] = pokemon;
+                resp = true;
+            }
         }
 
         return resp;
+    }
+
+    public int pesquisar(String name) {
+        int resp = -1;
+
+        int pos = hash(name);
+
+        if (tabela[pos] != null) {
+            if (tabela[pos].getName().equals(name)) {
+                resp = pos;
+            } else {
+                // se já tem um elemento na pos da tabela procura na reserva
+                for (int i = tamTab; i < tamTab + reserva; i++) {
+                    if (tabela[i].getName().equals(name)) {
+                        resp = i;
+                        i += reserva;
+                    }
+                }
+            }
+        }
+
+        return resp;
+    }
+
+    private int hash(String name) {
+        int sum = 0;
+        for (int i = 0; i < name.length(); i++) {
+            sum += (int) name.charAt(i);
+        }
+        return sum % tamTab;
+    }
+}
+
+public class TP04EX05 {
+
+    private static List<Pokemon> pokedex = new ArrayList<Pokemon>();
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void readFile(String path) {
+        try {
+            Scanner scanner = new Scanner(new File(path));
+            scanner.nextLine(); // skip header
+
+            while (scanner.hasNextLine()) {
+                pokedex.add(new Pokemon(scanner.nextLine()));
+            }
+
+            scanner.close();
+        } catch (Exception e) {
+        }
+    }
+
+    public static Pokemon findPokemon(String id) {
+        for (Pokemon pokemon : pokedex) {
+            if (pokemon.getId() == Integer.parseInt(id)) {
+                return pokemon;
+            }
+        }
+
+        return null;
+    }
+
+    public static void main(String[] args) {
+        readFile("/tmp/pokemon.csv");
+        Hash pokedex = new Hash();
+
+        String id = scanner.nextLine();
+        while (!id.equals("FIM")) {
+            pokedex.inserir(findPokemon(id));
+
+            id = scanner.nextLine();
+        }
+
+        String name = scanner.nextLine();
+        while (!name.equals("FIM")) {
+            System.out.print("=> " + name + ": ");
+
+            int pos = pokedex.pesquisar(name);
+            if (pos >= 0) {
+                System.out.println("(Posicao: " + pos + ") SIM");
+            } else {
+                System.out.println("NAO");
+            }
+
+            name = scanner.nextLine();
+        }
+
+        scanner.close();
     }
 }
